@@ -1,0 +1,78 @@
+<p>register works!</p>
+
+<form [formGroup]="generalForm()" class="letter" (ngSubmit)="onSubmit()">
+    <h4>Datos Personales</h4>
+    <div>
+        <label for="tipo_documento">Tipo de Documento</label>
+        <select formControlName="tipo_documento" id="tipo_documento">
+            <option value="DNI">DNI</option>
+            <option value="Pasaporte">Pasaporte</option>
+            <option value="CE">Carnet de Extranjería</option>
+        </select>
+        <!--Etiqueta de validacion-->
+        <div *ngIf="
+                generalForm().get('tipo_documento')?.invalid &&
+              (generalForm().get('tipo_documento')?.dirty ||
+              generalForm().get('tipo_documento')?.touched)
+            " class="text-danger">
+            <div *ngIf="generalForm().get('tipo_documento')?.errors?.['required']">
+                Seleccione un tipo de documento.
+            </div>
+        </div>
+        <!-- Fin -->
+        <br>
+        <label for="documento">Número de Documento</label>
+        <input type="text" formControlName="documento" placeholder="Ingrese su número de documento" id="documento"/>
+        <br>
+        <label for="nombre">Nombre: </label>
+        <input type="text" id="nombre" formControlName="nombre" placeholder="Ingrese nombre"/>
+        <br>
+        <label for="apePaterno">Apellido paterno </label>
+        <input type="text" id="apePaterno" formControlName="apellido_paterno" placeholder="Ingrese apellido paterno"/>
+        <br>
+        <label for="apeMaterno">Apellido materno </label>
+        <input type="text" id="apeMaterno" formControlName="apellido_materno" placeholder="Ingrese apellido materno"/>
+        <br>
+        <label for="departamento">Departamento </label>
+        <select name="departamento" id="departamento" formControlName="departamento" (change)="refreshProvinciaList()">
+            <option *ngFor="let d of departamentos" [value]="d">{{d}}</option>
+        </select>        
+        <br>
+        <label for="provincia">Provincia </label>
+        <select name="provincia" id="provincia" formControlName="provincia"  (change)="refreshDistritoList()">
+            <option *ngFor="let p of provincias" [value]="p">{{p}}</option>
+        </select>
+        <br>
+        <label for="distrito">Distrito </label>
+        <select name="distrito" id="distrito" formControlName="distrito" (change)="setIdUbigeo()">
+            <option *ngFor="let d of distritos" [value]="d">{{d}}</option>
+        </select>
+        <br>
+        <label for="telefono">Telefono </label>
+        <input type="text" formControlName = "telefono">
+        <br>
+        <label for="fecha_nacimiento">Fecha de nacimiento</label>
+        <input type="date" formControlName="fecha_nacimiento">
+        <br>
+        <label for="sexo">Sexo </label>
+        <select name="sexo" id="sexo" formControlName="sexo">
+            <option value="M">M</option>
+            <option value="F">F</option>
+        </select>
+        <br>
+        <label for="correo">Correo </label>
+        <input type="text" formControlName = "correo">
+        <br>
+        <label for="password">Password </label>
+        <input type="password" id="password" formControlName = "password">
+        <br>
+        <label for="conf_password">Confirm password </label>
+        <input type="text" id="conf_password">
+    </div>
+    <button type="submit">Enviar</button>
+</form>
+
+
+<pre>{{ generalForm().value | json}}</pre>
+<div>afsdf</div>
+<pre>sdfsdf</pre>

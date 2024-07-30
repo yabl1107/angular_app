@@ -1,0 +1,21 @@
+<p>login works!</p>
+
+
+<p>Selected value: {{ selectedValue }}</p>
+<select [(ngModel)]="selectedValue">
+  <option *ngFor="let option of options" [value]="option">{{ option }}</option>
+</select>
+
+<form #myForm="ngForm" (ngSubmit)="login(myForm)">
+    <label for="username">usuario: </label>
+    <input type="text" id="correo" name="correo">
+    <br>
+    <label for="password">password: </label>
+    <input type="password" id="password" name="password">
+    <br>
+    <button type="submit">Submit</button>
+</form>
+
+
+<button [routerLink]="['/especialista']">Go to especialista</button>
+<button [routerLink]="['/register']">Registrar</button>
