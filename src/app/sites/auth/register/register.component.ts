@@ -1,8 +1,11 @@
 import { Component , inject, signal} from '@angular/core';
 import { CommonModule, JsonPipe } from '@angular/common';
-import { FormGroup, ReactiveFormsModule,FormControl, Validators } from '@angular/forms';
+import { FormGroup, ReactiveFormsModule,FormControl, Validators, Form } from '@angular/forms';
 import { UbigeoService } from '../../../core/services/ubigeo.service';
 import { Ubigeo } from '../../../core/models/ubigeo';
+import { Persona } from '../../../core/models/persona';
+import { RegisterService } from '../../../core/services/register.service';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-register',
@@ -18,8 +21,23 @@ export class RegisterComponent {
   departamentos : string[] = [];
   provincias : string[] = [];
   distritos : string[] = [];
-  
-  formGroup: FormGroup =  new FormGroup(
+  isEspecialist = signal<boolean>(false);
+
+  constructor(
+    private ubigeoService : UbigeoService,
+    private registerService : RegisterService
+  ){
+    //this.departamentos = ubigeoService.departamentos;
+    this.ubigeoService.departamentos$.subscribe(data => {
+      this.departamentos = data;
+      console.log("primer print" , this.departamentos);
+    });
+    
+    console.log("segundo print", this.departamentos);
+  }
+
+
+  formGroupPersona: FormGroup =  new FormGroup(
     {
       documento: new FormControl('', [Validators.required]),
       tipo_documento: new FormControl('', [Validators.required]),
@@ -35,51 +53,94 @@ export class RegisterComponent {
       fecha_nacimiento: new FormControl('', [Validators.required]),
       sexo: new FormControl('', [Validators.required]),
       id_ubigeo: new FormControl(''),
-      //modelo usuario
+      
+      //Usuario (documento,correo, password)
       correo: new FormControl('', [Validators.required, Validators.email]),
       password: new FormControl('', [Validators.required]),
     });
 
-  generalForm = signal<FormGroup>(this.formGroup);
+    //Especialista
+    formGroupEspecialista: FormGroup = new FormGroup(
+      {
+        //Especialista (id_usuario, licencia, especialidad)
+        licencia: new FormControl('', [Validators.required, Validators.email]),
+        especialidad : new FormControl('', [Validators.required, Validators.email])
+      }
+    )
 
-  constructor(
-    private ubigeoService : UbigeoService
-  ){
-    this.departamentos = ubigeoService.departamentos;
-  }
+    generalForm = signal<FormGroup>(this.formGroupPersona);
+    especialistaForm = signal<FormGroup>(this.formGroupEspecialista);
 
-  // Enviar formulario. 
+    // Enviar formulario. 
   onSubmit() {
-    console.log('Formulario enviado', this.formGroup.value);
+    
+    //Si es especialsita envia especialista : {licencia: 123 , especialidad: 123}
+    const data = {
+      isEspecialist : this.isEspecialist(),
+      ...this.formGroupPersona.value,
+      ...(this.isEspecialist()? {especialista : this.formGroupEspecialista.value} : {}),
+    }
+
+    this.registerService.register(data).subscribe({
+      next: (rpta) => {console.log(rpta)},
+      error: (err) => {
+        const errorMessage = err.error?.message || 'Ocurrió un error durante el registro.'
+        console.log("error", err);
+        Swal.fire({
+          title:'Error',
+          text: errorMessage,
+          icon: 'error',
+          confirmButtonText: 'Aceptar'
+        });
+      },
+      complete: () => {
+        Swal.fire({
+          title:'!Registro exitoso!',
+          text: 'Se completó el registro exitosamente.',
+          icon: 'success',
+          confirmButtonText: 'Aceptar'
+        });
+      }
+    });
+
+    console.log('Formulario enviado', data);
     
 
   }
 
+
+  toggle(): void {
+    this.isEspecialist.set(!this.isEspecialist());
+    if(!this.isEspecialist()){
+      this.especialistaForm().reset();
+    }
+  }
+
   setIdUbigeo(){
-    const departamento = this.formGroup.get('departamento')?.value;
-    const provincia = this.formGroup.get('provincia')?.value;
-    const distrito = this.formGroup.get('distrito')?.value;
+    const departamento = this.formGroupPersona.get('departamento')?.value;
+    const provincia = this.formGroupPersona.get('provincia')?.value;
+    const distrito = this.formGroupPersona.get('distrito')?.value;
     const id = this.ubigeoService.getIdUbigeo(distrito,provincia,departamento);
-    this.formGroup.get('id_ubigeo')?.setValue(id);
+    this.formGroupPersona.get('id_ubigeo')?.setValue(id);
   }
   
   refreshProvinciaList(){
     //Limpiar valores
-    this.formGroup.get('provincia')?.setValue('');
-    this.formGroup.get('distrito')?.setValue('');
-    this.formGroup.get('id_ubigeo')?.reset();
+    this.formGroupPersona.get('provincia')?.setValue('');
+    this.formGroupPersona.get('distrito')?.setValue('');
+    this.formGroupPersona.get('id_ubigeo')?.reset();
     //Obtener departamento seleccionado
-    const departamento = this.formGroup.get('departamento')?.value;
+    const departamento = this.formGroupPersona.get('departamento')?.value;
     //Refrescar provincias
     this.provincias = this.ubigeoService.obtenerProvincias(departamento);
   }
 
   refreshDistritoList(){
     //Limpiar valor seleccionado 
-    this.formGroup.get('distrito')?.reset();
-    this.formGroup.get('id_ubigeo')?.reset();
+    this.formGroupPersona.get('distrito')?.reset();
+    this.formGroupPersona.get('id_ubigeo')?.reset();
     //OBtener provincia seleccionada
-    const provincia = this.formGroup.get('provincia')?.value;
+    const provincia = this.formGroupPersona.get('provincia')?.value;
     this.distritos = this.ubigeoService.obtenerDistrito(provincia);
   }
 

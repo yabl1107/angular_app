@@ -1,4 +1,8 @@
 <p>register works!</p>
+<button (click)="toggle()">
+    {{ isEspecialist() ? 'Especialista' : 'Paciente' }}
+</button>
+
 
 <form [formGroup]="generalForm()" class="letter" (ngSubmit)="onSubmit()">
     <h4>Datos Personales</h4>
@@ -69,10 +73,21 @@
         <label for="conf_password">Confirm password </label>
         <input type="text" id="conf_password">
     </div>
-    <button type="submit">Enviar</button>
+
+    <div *ngIf="isEspecialist()" [formGroup]="especialistaForm()">
+        <label for="licencia">Licencia </label>
+        <input type="text" id="licencia" formControlName = "licencia">
+        <br>
+        <label for="especialidad">Especialidad </label>
+        <input type="text" id="especialidad" formControlName = "especialidad">
+    </div>
+
+    <button type="submit" [disabled]="!generalForm().valid">Enviar</button>
 </form>
 
 
 <pre>{{ generalForm().value | json}}</pre>
 <div>afsdf</div>
 <pre>sdfsdf</pre>
+<pre>{{ especialistaForm().value | json}}</pre>
+<div>asdas</div>

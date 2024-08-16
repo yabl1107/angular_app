@@ -18,5 +18,4 @@ export const routes: Routes = [
         canActivate:[authGuard],
         component: PacienteComponent
     }
-
 ];

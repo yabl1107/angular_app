@@ -8,10 +8,10 @@
 
 <form #myForm="ngForm" (ngSubmit)="login(myForm)">
     <label for="username">usuario: </label>
-    <input type="text" id="correo" name="correo">
+    <input type="text" id="correo" name="correo" ngModel>
     <br>
     <label for="password">password: </label>
-    <input type="password" id="password" name="password">
+    <input type="password" id="password" name="password" ngModel>
     <br>
     <button type="submit">Submit</button>
 </form>
